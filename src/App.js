@@ -27,14 +27,18 @@ function App() {
       <Container fixed>
         <NavBar />
         <ReactQueryConfigProvider config={queryConfig}>
-          <Suspense fallback={<LoadingComponent message={'Loading'} />}>
+          <Suspense fallback={<LoadingComponent message={'Loading Users'} />}>
             <UserList selectedUser={selectedUser} setSelectedUser={setSelectedUser} setSelectedAlbum={setSelectedAlbum} />
             {selectedUser ?
-              <AlbumList userId={selectedUser} selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />
+              <Suspense fallback={<LoadingComponent message={'Loading Albums'} />}>
+                <AlbumList userId={selectedUser} selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />
+              </Suspense>
               : <div></div>
             }
             {selectedAlbum ?
-              <PhotosList albumId={selectedAlbum} />
+              <Suspense fallback={<LoadingComponent message={'Loading Photos'} />}>
+                <PhotosList albumId={selectedAlbum} />
+              </Suspense>
               : <div></div>
             }
           </Suspense>
