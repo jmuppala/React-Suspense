@@ -1,5 +1,6 @@
 import React from "react";
 import { useQuery } from "react-query";
+import { useErrorHandler } from 'react-error-boundary';
 import { fetchPhotos } from '../shared/dataOperations';
 import { makeStyles } from '@material-ui/core/styles';
 import GridList from '@material-ui/core/GridList';
@@ -30,31 +31,36 @@ const useStyles = makeStyles((theme) => ({
 export default function PhotosList( { albumId }) {
     const classes = useStyles();
 
-    const { data } = useQuery(["photos", albumId], fetchPhotos);
+    const { isError, data, error } = useQuery(["photos", albumId], fetchPhotos);
+
+    useErrorHandler(error);
 
     console.log("Album Id " + albumId);
-  console.log(data);
+    console.log('isError: ', isError, 'data: ', data, 'error: ', error);
 
-  return (
-    <div className={classes.root}>
-      <GridListTile key="Subheader" cols={3} style={{ height: 'auto' }}>
-        <ListSubheader component="div"><h2>Photos</h2></ListSubheader>
-      </GridListTile>
-      <GridList cellHeight={150} cols={3} className={classes.gridList}>
-        {data.map((photo) => (
-          <GridListTile key={photo.thumbnailUrl}>
-            <img src={photo.thumbnailUrl} alt={photo.title} />
-            <GridListTileBar
-              title={photo.title}
-              actionIcon={
-                <IconButton aria-label={`info about ${photo.title}`} className={classes.icon}>
-                  <InfoIcon />
-                </IconButton>
-              }
-            />
-          </GridListTile>
-        ))}
-      </GridList>
-    </div>
-  );
+  if (!isError)
+    return (
+        <div className={classes.root}>
+        <GridListTile key="Subheader" cols={3} style={{ height: 'auto' }}>
+            <ListSubheader component="div"><h2>Photos</h2></ListSubheader>
+        </GridListTile>
+        <GridList cellHeight={150} cols={3} className={classes.gridList}>
+            {data.map((photo) => (
+            <GridListTile key={photo.thumbnailUrl}>
+                <img src={photo.thumbnailUrl} alt={photo.title} />
+                <GridListTileBar
+                title={photo.title}
+                actionIcon={
+                    <IconButton aria-label={`info about ${photo.title}`} className={classes.icon}>
+                    <InfoIcon />
+                    </IconButton>
+                }
+                />
+            </GridListTile>
+            ))}
+        </GridList>
+        </div>
+    );
+  else return(<div></div>);
+
 }

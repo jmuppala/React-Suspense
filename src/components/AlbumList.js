@@ -1,5 +1,6 @@
 import React from "react";
 import { useQuery } from "react-query";
+import { useErrorHandler } from 'react-error-boundary';
 import { fetchAlbums } from '../shared/dataOperations';
 import { makeStyles } from '@material-ui/core/styles';
 import GridList from '@material-ui/core/GridList';
@@ -42,25 +43,29 @@ export default function AlbumList( { userId, selectedAlbum, setSelectedAlbum }) 
         setSelectedAlbum(id);
     };
 
-    const { data } = useQuery(["albums", userId], fetchAlbums);
+    const { isError, data, error } = useQuery(["albums", userId], fetchAlbums);
+
+    useErrorHandler(error);
 
     console.log("User Id " + userId + "selected Album ", selectedAlbum);
-    console.log(data);
+    console.log('isError: ', isError, 'data: ', data, 'error: ', error);
 
-  return (
-    <div className={classes.root}>
-      <h2>Albums</h2>
-      <GridList className={classes.gridList} cols={2.5} cellHeight='auto' spacing={20}>
-        {data.map((album) => (
-            <ListItem key={album.id} className={classes.listItem}
-                button
-                selected={selectedAlbum === album.id}
-                onClick={(event) => handleListItemClick(event, album.id)}
-            >
-                <ListItemText className={classes.title} primary={album.title} />
-            </ListItem>
-        ))}
-      </GridList>
-    </div>
-  );
+   if (!isError)
+    return (
+        <div className={classes.root}>
+        <h2>Albums</h2>
+        <GridList className={classes.gridList} cols={2.5} cellHeight='auto' spacing={20}>
+            {data.map((album) => (
+                <ListItem key={album.id} className={classes.listItem}
+                    button
+                    selected={selectedAlbum === album.id}
+                    onClick={(event) => handleListItemClick(event, album.id)}
+                >
+                    <ListItemText className={classes.title} primary={album.title} />
+                </ListItem>
+            ))}
+        </GridList>
+        </div>
+    );
+  else return(<div></div>);
 }

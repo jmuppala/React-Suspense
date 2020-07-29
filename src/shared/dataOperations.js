@@ -1,7 +1,14 @@
 import { baseUrl } from './baseUrl';
 
+function handleErrors(response) {
+    if (!response.ok) throw Error('Error: ' + response.status + ' : ' + response.statusText + ' ' + response.url);
+    return response;
+}
+
 async function fetchData(path) {
-    return(await fetch(baseUrl + path).then(response => new Promise(resolve => setTimeout(() => resolve(response.json()), 5000)) ));
+    return(await fetch(baseUrl + path)
+    .then(handleErrors)
+    .then(response => new Promise(resolve => setTimeout(() => resolve(response.json()), 5000)) ));
 }
 
 export const fetchUsers = () => fetchData('users');

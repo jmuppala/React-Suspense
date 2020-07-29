@@ -1,5 +1,6 @@
 import React from "react";
 import { useQuery } from "react-query";
+import { useErrorHandler } from 'react-error-boundary';
 import { fetchUsers } from '../shared/dataOperations';
 import { makeStyles } from '@material-ui/core/styles';
 import GridList from '@material-ui/core/GridList';
@@ -42,25 +43,29 @@ export default function UserList({ selectedUser, setSelectedUser, setSelectedAlb
     setSelectedAlbum(null);
   };
 
-  const { data } = useQuery('users', fetchUsers);
+  const { isError, data, error } = useQuery('users', fetchUsers);
+
+  useErrorHandler(error);
 
   console.log("selected User ", selectedUser);
-  console.log(data);
-
-  return (
-    <div className={classes.root}>
-      <h2>Users</h2>
-      <GridList className={classes.gridList} cols={2.5} cellHeight='auto' spacing={20}>
-        {data.map((user) => (
-            <ListItem key={user.id} className={classes.listItem}
-                button
-                selected={selectedUser === user.id}
-                onClick={(event) => handleListItemClick(event, user.id)}
-            >
-                <ListItemText className={classes.title} primary={user.name} />
-            </ListItem>
-        ))}
-      </GridList>
-    </div>
-  );
+  console.log('isError: ', isError, 'data: ', data, 'error: ', error);
+  
+  if (!isError)
+    return (
+        <div className={classes.root}>
+        <h2>Users</h2>
+        <GridList className={classes.gridList} cols={2.5} cellHeight='auto' spacing={20}>
+            {data.map((user) => (
+                <ListItem key={user.id} className={classes.listItem}
+                    button
+                    selected={selectedUser === user.id}
+                    onClick={(event) => handleListItemClick(event, user.id)}
+                >
+                    <ListItemText className={classes.title} primary={user.name} />
+                </ListItem>
+            ))}
+        </GridList>
+        </div>
+    );
+  else return(<div></div>);
 }

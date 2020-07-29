@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from "react-query-devtools";
 import NavBar from './components/NavBar';
 import LoadingComponent from './components/LoadingComponent';
 import { ReactQueryConfigProvider } from "react-query";
+import { ErrorBoundary } from "react-error-boundary";
 
 const queryConfig = {
   shared: {
@@ -27,6 +28,24 @@ function App() {
       <Container fixed>
         <NavBar />
         <ReactQueryConfigProvider config={queryConfig}>
+          <ErrorBoundary
+            fallbackRender={({error, componentStack, resetErrorBoundary}) => (
+              <div role="alert">
+                <div>Something went wrong!!</div>
+                <pre>{error.message}</pre>
+                <button
+                  onClick={() => {
+                    // this next line is why the fallbackRender is useful
+                    // though you could accomplish this with a combination
+                    // of the FallbackCallback and onReset props as well.
+                    resetErrorBoundary()
+                  }}
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+          >
           <Suspense fallback={<LoadingComponent message={'Loading Users'} />}>
             <UserList selectedUser={selectedUser} setSelectedUser={setSelectedUser} setSelectedAlbum={setSelectedAlbum} />
             {selectedUser ?
@@ -42,6 +61,7 @@ function App() {
               : <div></div>
             }
           </Suspense>
+          </ErrorBoundary>
           <ReactQueryDevtools initialIsOpen />
         </ReactQueryConfigProvider>
       </Container>
